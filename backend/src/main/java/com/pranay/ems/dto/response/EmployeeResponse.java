@@ -21,4 +21,6 @@ public class EmployeeResponse {
     private String designation;
 
     private EmployeeStatus status;
+
+    private String departmentName;
 }

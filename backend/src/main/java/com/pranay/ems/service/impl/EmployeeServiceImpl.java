@@ -2,19 +2,18 @@ package com.pranay.ems.service.impl;
 
 import com.pranay.ems.dto.request.EmployeeRequest;
 import com.pranay.ems.dto.response.EmployeeResponse;
+import com.pranay.ems.entity.Department;
+import com.pranay.ems.entity.Employee;
 import com.pranay.ems.entity.User;
 import com.pranay.ems.enums.EmployeeStatus;
 import com.pranay.ems.exception.DuplicateResourceException;
 import com.pranay.ems.exception.ResourceNotFoundException;
+import com.pranay.ems.repository.DepartmentRepository;
 import com.pranay.ems.repository.EmployeeRepository;
 import com.pranay.ems.repository.UserRepository;
 import com.pranay.ems.service.EmployeeService;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import com.pranay.ems.entity.Employee;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,32 +23,38 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
-                               UserRepository userRepository) {
+                               UserRepository userRepository,
+                               DepartmentRepository departmentRepository) {
+
         this.employeeRepository = employeeRepository;
         this.userRepository = userRepository;
+        this.departmentRepository = departmentRepository;
     }
+
     @Override
     public EmployeeResponse addEmployee(EmployeeRequest request) {
 
-        // Check if employee code already exists
         if (employeeRepository.existsByEmployeeCode(request.getEmployeeCode())) {
             throw new DuplicateResourceException("Employee code already exists.");
         }
 
-        // Check if email already exists
         if (employeeRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("Email already exists.");
+            throw new DuplicateResourceException("Employee email already exists.");
         }
 
-        // Fetch user by ID
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
-                                "User not found with ID: " + request.getUserId()));
+                                "User not found with ID : " + request.getUserId()));
 
-        // Create Employee Entity
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Department not found with ID : " + request.getDepartmentId()));
+
         Employee employee = new Employee();
 
         employee.setEmployeeCode(request.getEmployeeCode());
@@ -65,23 +70,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setAddress(request.getAddress());
         employee.setStatus(request.getStatus());
 
-        // Link User
         employee.setUser(user);
+        employee.setDepartment(department);
 
-        // Save Employee
         Employee savedEmployee = employeeRepository.save(employee);
 
-        // Prepare Response
-        EmployeeResponse response = new EmployeeResponse();
-
-        response.setId(savedEmployee.getId());
-        response.setEmployeeCode(savedEmployee.getEmployeeCode());
-        response.setFullName(savedEmployee.getFirstName() + " " + savedEmployee.getLastName());
-        response.setEmail(savedEmployee.getEmail());
-        response.setDesignation(savedEmployee.getDesignation());
-        response.setStatus(savedEmployee.getStatus());
-
-        return response;
+        return mapToEmployeeResponse(savedEmployee);
     }
 
     @Override
@@ -92,17 +86,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<EmployeeResponse> responseList = new ArrayList<>();
 
         for (Employee employee : employees) {
-
-            EmployeeResponse response = new EmployeeResponse();
-
-            response.setId(employee.getId());
-            response.setEmployeeCode(employee.getEmployeeCode());
-            response.setFullName(employee.getFirstName() + " " + employee.getLastName());
-            response.setEmail(employee.getEmail());
-            response.setDesignation(employee.getDesignation());
-            response.setStatus(employee.getStatus());
-
-            responseList.add(response);
+            responseList.add(mapToEmployeeResponse(employee));
         }
 
         return responseList;
@@ -113,44 +97,40 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found with ID: " + id));
+                        new ResourceNotFoundException(
+                                "Employee not found with ID : " + id));
 
-        EmployeeResponse response = new EmployeeResponse();
-
-        response.setId(employee.getId());
-        response.setEmployeeCode(employee.getEmployeeCode());
-        response.setFullName(employee.getFirstName() + " " + employee.getLastName());
-        response.setEmail(employee.getEmail());
-        response.setDesignation(employee.getDesignation());
-        response.setStatus(employee.getStatus());
-
-        return response;
+        return mapToEmployeeResponse(employee);
     }
-
     @Override
     public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
 
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found with ID: " + id));
+                        new ResourceNotFoundException(
+                                "Employee not found with ID : " + id));
 
-        // Check employee code if changed
         if (!employee.getEmployeeCode().equals(request.getEmployeeCode())
                 && employeeRepository.existsByEmployeeCode(request.getEmployeeCode())) {
 
             throw new DuplicateResourceException("Employee code already exists.");
         }
 
-        // Check email if changed
         if (!employee.getEmail().equals(request.getEmail())
                 && employeeRepository.existsByEmail(request.getEmail())) {
 
-            throw new DuplicateResourceException("Email already exists.");
+            throw new DuplicateResourceException("Employee email already exists.");
         }
 
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found with ID: " + request.getUserId()));
+                        new ResourceNotFoundException(
+                                "User not found with ID : " + request.getUserId()));
+
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Department not found with ID : " + request.getDepartmentId()));
 
         employee.setEmployeeCode(request.getEmployeeCode());
         employee.setFirstName(request.getFirstName());
@@ -164,20 +144,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setSalary(request.getSalary());
         employee.setAddress(request.getAddress());
         employee.setStatus(request.getStatus());
+
         employee.setUser(user);
+        employee.setDepartment(department);
 
         Employee updatedEmployee = employeeRepository.save(employee);
 
-        EmployeeResponse response = new EmployeeResponse();
-
-        response.setId(updatedEmployee.getId());
-        response.setEmployeeCode(updatedEmployee.getEmployeeCode());
-        response.setFullName(updatedEmployee.getFirstName() + " " + updatedEmployee.getLastName());
-        response.setEmail(updatedEmployee.getEmail());
-        response.setDesignation(updatedEmployee.getDesignation());
-        response.setStatus(updatedEmployee.getStatus());
-
-        return response;
+        return mapToEmployeeResponse(updatedEmployee);
     }
 
     @Override
@@ -185,7 +158,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found with ID: " + id));
+                        new ResourceNotFoundException(
+                                "Employee not found with ID : " + id));
 
         employeeRepository.delete(employee);
     }
@@ -194,12 +168,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<EmployeeResponse> searchEmployees(String keyword) {
 
         List<Employee> employees =
-                employeeRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmployeeCodeContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                        keyword,
-                        keyword,
-                        keyword,
-                        keyword
-                );
+                employeeRepository
+                        .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmployeeCodeContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                                keyword,
+                                keyword,
+                                keyword,
+                                keyword
+                        );
 
         List<EmployeeResponse> responseList = new ArrayList<>();
 
@@ -209,7 +184,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return responseList;
     }
-
     @Override
     public Page<EmployeeResponse> getEmployees(int page,
                                                int size,
@@ -226,6 +200,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return employeePage.map(this::mapToEmployeeResponse);
     }
+
     @Override
     public List<EmployeeResponse> getEmployeesByStatus(EmployeeStatus status) {
 
@@ -239,7 +214,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return responseList;
     }
-
 
     @Override
     public List<EmployeeResponse> getEmployeesByDesignation(String designation) {
@@ -255,6 +229,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return responseList;
     }
+
     private EmployeeResponse mapToEmployeeResponse(Employee employee) {
 
         EmployeeResponse response = new EmployeeResponse();
@@ -265,6 +240,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         response.setEmail(employee.getEmail());
         response.setDesignation(employee.getDesignation());
         response.setStatus(employee.getStatus());
+
+        if (employee.getDepartment() != null) {
+            response.setDepartmentName(
+                    employee.getDepartment().getDepartmentName());
+        }
 
         return response;
     }
