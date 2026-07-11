@@ -3,13 +3,18 @@ package com.pranay.ems.service.impl;
 import com.pranay.ems.dto.request.EmployeeRequest;
 import com.pranay.ems.dto.response.EmployeeResponse;
 import com.pranay.ems.entity.User;
+import com.pranay.ems.enums.EmployeeStatus;
 import com.pranay.ems.exception.DuplicateResourceException;
 import com.pranay.ems.exception.ResourceNotFoundException;
 import com.pranay.ems.repository.EmployeeRepository;
 import com.pranay.ems.repository.UserRepository;
 import com.pranay.ems.service.EmployeeService;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.pranay.ems.entity.Employee;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -183,5 +188,84 @@ public class EmployeeServiceImpl implements EmployeeService {
                         new ResourceNotFoundException("Employee not found with ID: " + id));
 
         employeeRepository.delete(employee);
+    }
+
+    @Override
+    public List<EmployeeResponse> searchEmployees(String keyword) {
+
+        List<Employee> employees =
+                employeeRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmployeeCodeContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                        keyword,
+                        keyword,
+                        keyword,
+                        keyword
+                );
+
+        List<EmployeeResponse> responseList = new ArrayList<>();
+
+        for (Employee employee : employees) {
+            responseList.add(mapToEmployeeResponse(employee));
+        }
+
+        return responseList;
+    }
+
+    @Override
+    public Page<EmployeeResponse> getEmployees(int page,
+                                               int size,
+                                               String sortBy,
+                                               String direction) {
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Employee> employeePage = employeeRepository.findAll(pageable);
+
+        return employeePage.map(this::mapToEmployeeResponse);
+    }
+    @Override
+    public List<EmployeeResponse> getEmployeesByStatus(EmployeeStatus status) {
+
+        List<Employee> employees = employeeRepository.findByStatus(status);
+
+        List<EmployeeResponse> responseList = new ArrayList<>();
+
+        for (Employee employee : employees) {
+            responseList.add(mapToEmployeeResponse(employee));
+        }
+
+        return responseList;
+    }
+
+
+    @Override
+    public List<EmployeeResponse> getEmployeesByDesignation(String designation) {
+
+        List<Employee> employees =
+                employeeRepository.findByDesignationContainingIgnoreCase(designation);
+
+        List<EmployeeResponse> responseList = new ArrayList<>();
+
+        for (Employee employee : employees) {
+            responseList.add(mapToEmployeeResponse(employee));
+        }
+
+        return responseList;
+    }
+    private EmployeeResponse mapToEmployeeResponse(Employee employee) {
+
+        EmployeeResponse response = new EmployeeResponse();
+
+        response.setId(employee.getId());
+        response.setEmployeeCode(employee.getEmployeeCode());
+        response.setFullName(employee.getFirstName() + " " + employee.getLastName());
+        response.setEmail(employee.getEmail());
+        response.setDesignation(employee.getDesignation());
+        response.setStatus(employee.getStatus());
+
+        return response;
     }
 }
