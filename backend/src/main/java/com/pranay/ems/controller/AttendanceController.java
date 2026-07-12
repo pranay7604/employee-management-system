@@ -8,6 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +23,7 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PostMapping("/check-in")
     public ResponseEntity<AttendanceResponse> checkIn(
             @Valid @RequestBody AttendanceRequest request) {
@@ -31,6 +33,7 @@ public class AttendanceController {
                 HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PutMapping("/check-out/{attendanceId}")
     public ResponseEntity<AttendanceResponse> checkOut(
             @PathVariable Long attendanceId) {
@@ -39,6 +42,7 @@ public class AttendanceController {
                 attendanceService.checkOut(attendanceId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping
     public ResponseEntity<List<AttendanceResponse>> getAllAttendance() {
 
@@ -46,6 +50,7 @@ public class AttendanceController {
                 attendanceService.getAllAttendance());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/{id}")
     public ResponseEntity<AttendanceResponse> getAttendanceById(
             @PathVariable Long id) {
@@ -54,6 +59,7 @@ public class AttendanceController {
                 attendanceService.getAttendanceById(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<AttendanceResponse>> getAttendanceByEmployee(
             @PathVariable Long employeeId) {
@@ -62,6 +68,7 @@ public class AttendanceController {
                 attendanceService.getAttendanceByEmployee(employeeId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/date/{date}")
     public ResponseEntity<List<AttendanceResponse>> getAttendanceByDate(
             @PathVariable

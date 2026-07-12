@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @RestController
@@ -22,6 +22,7 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<EmployeeResponse> addEmployee(
             @Valid @RequestBody EmployeeRequest request) {
@@ -31,6 +32,7 @@ public class EmployeeController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping
     public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
 
@@ -38,7 +40,7 @@ public class EmployeeController {
 
         return ResponseEntity.ok(employees);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable Long id) {
 
@@ -46,6 +48,7 @@ public class EmployeeController {
 
         return ResponseEntity.ok(response);
     }
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponse> updateEmployee(
             @PathVariable Long id,
@@ -55,6 +58,7 @@ public class EmployeeController {
 
         return ResponseEntity.ok(response);
     }
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {
 
@@ -62,6 +66,7 @@ public class EmployeeController {
 
         return ResponseEntity.ok("Employee deleted successfully.");
     }
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/search")
     public ResponseEntity<List<EmployeeResponse>> searchEmployees(
             @RequestParam String keyword) {
@@ -71,6 +76,7 @@ public class EmployeeController {
 
         return ResponseEntity.ok(employees);
     }
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/page")
     public ResponseEntity<Page<EmployeeResponse>> getEmployees(
 
@@ -82,12 +88,14 @@ public class EmployeeController {
         return ResponseEntity.ok(
                 employeeService.getEmployees(page, size, sortBy, direction));
     }
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<EmployeeResponse>> getEmployeesByStatus(
             @PathVariable EmployeeStatus status) {
 
         return ResponseEntity.ok(employeeService.getEmployeesByStatus(status));
     }
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/designation/{designation}")
     public ResponseEntity<List<EmployeeResponse>> getEmployeesByDesignation(
             @PathVariable String designation) {

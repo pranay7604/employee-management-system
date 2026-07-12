@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class LeaveController {
         this.leaveService = leaveService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR','EMPLOYEE')")
     @PostMapping
     public ResponseEntity<LeaveResponse> applyLeave(
             @Valid @RequestBody LeaveRequestDto request) {
@@ -30,6 +32,7 @@ public class LeaveController {
                 HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PutMapping("/{leaveId}/approve")
     public ResponseEntity<LeaveResponse> approveLeave(
             @PathVariable Long leaveId,
@@ -39,6 +42,7 @@ public class LeaveController {
                 leaveService.approveLeave(leaveId, approvedBy));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PutMapping("/{leaveId}/reject")
     public ResponseEntity<LeaveResponse> rejectLeave(
             @PathVariable Long leaveId,
@@ -48,6 +52,7 @@ public class LeaveController {
                 leaveService.rejectLeave(leaveId, approvedBy));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping
     public ResponseEntity<List<LeaveResponse>> getAllLeaves() {
 
@@ -55,6 +60,7 @@ public class LeaveController {
                 leaveService.getAllLeaves());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/{id}")
     public ResponseEntity<LeaveResponse> getLeaveById(
             @PathVariable Long id) {
@@ -63,6 +69,7 @@ public class LeaveController {
                 leaveService.getLeaveById(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR','EMPLOYEE')")
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<LeaveResponse>> getLeavesByEmployee(
             @PathVariable Long employeeId) {
@@ -71,6 +78,7 @@ public class LeaveController {
                 leaveService.getLeavesByEmployee(employeeId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/status/{status}")
     public ResponseEntity<List<LeaveResponse>> getLeavesByStatus(
             @PathVariable LeaveStatus status) {

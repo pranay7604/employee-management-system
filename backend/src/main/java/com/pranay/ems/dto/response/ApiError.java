@@ -1,4 +1,4 @@
-package com.pranay.ems.dto;
+package com.pranay.ems.dto.response;
 
 import java.time.LocalDateTime;
 

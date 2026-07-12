@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<DepartmentResponse> addDepartment(
             @Valid @RequestBody DepartmentRequest request) {
@@ -29,11 +31,13 @@ public class DepartmentController {
                 HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping
     public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
         return ResponseEntity.ok(departmentService.getAllDepartments());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentResponse> getDepartmentById(
             @PathVariable Long id) {
@@ -41,6 +45,7 @@ public class DepartmentController {
         return ResponseEntity.ok(departmentService.getDepartmentById(id));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentResponse> updateDepartment(
             @PathVariable Long id,
@@ -50,6 +55,7 @@ public class DepartmentController {
                 departmentService.updateDepartment(id, request));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteDepartment(
             @PathVariable Long id) {
@@ -59,6 +65,7 @@ public class DepartmentController {
         return ResponseEntity.ok("Department deleted successfully.");
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/search")
     public ResponseEntity<List<DepartmentResponse>> searchDepartment(
             @RequestParam String keyword) {

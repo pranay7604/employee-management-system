@@ -1,4 +1,4 @@
-package com.pranay.ems.dto;
+package com.pranay.ems.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
