@@ -13,6 +13,8 @@ public interface LeaveRepository extends JpaRepository<LeaveRequest, Long> {
     List<LeaveRequest> findByEmployee(Employee employee);
 
     List<LeaveRequest> findByStatus(LeaveStatus status);
+    
+    long countByStatus(LeaveStatus status);
 
     List<LeaveRequest> findByStartDateBetween(LocalDate startDate,
                                               LocalDate endDate);
@@ -21,5 +23,6 @@ public interface LeaveRepository extends JpaRepository<LeaveRequest, Long> {
             Employee employee,
             LocalDate endDate,
             LocalDate startDate
+
     );
 }
