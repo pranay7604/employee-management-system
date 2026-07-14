@@ -1,190 +1,189 @@
 import { useEffect, useState } from "react";
-import { getAllEmployees } from "../../services/employeeService";
-import EmployeeDialog from "../../components/employee/EmployeeDialog";
 
 import {
     Box,
-    Button,
-    CircularProgress,
-    Paper,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-    Typography
+    Typography,
+    CircularProgress
 } from "@mui/material";
+
+import {
+    getAllEmployees,
+    getEmployeeById,
+    deleteEmployee
+} from "../../services/employeeService";
+
+import EmployeeTable from "../../components/employee/EmployeeTable";
+import EmployeeToolbar from "../../components/employee/EmployeeToolbar";
+import EmployeeDialog from "../../components/employee/EmployeeDialog";
 
 function Employee() {
 
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [open, setOpen] = useState(false);
 
-    useEffect(() => {
-        loadEmployees();
-    }, []);
+    const [search, setSearch] = useState("");
+
+    const [open, setOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+         const [dialogMode, setDialogMode] = useState("add");
 
     const loadEmployees = async () => {
+
         try {
 
             const data = await getAllEmployees();
-
-            console.log(data);
 
             setEmployees(data);
 
         } catch (error) {
 
-            console.error("Error loading employees:", error);
+            console.error(error);
 
         } finally {
 
             setLoading(false);
 
         }
+
     };
 
-    if (loading) {
+    useEffect(() => {
+
+        loadEmployees();
+
+    }, []);
+
+    const filteredEmployees = employees.filter((employee) => {
+
+        const keyword = search.toLowerCase();
+
         return (
-            <Box
-    sx={{
-        display: "flex",
-        justifyContent: "center",
-        mt: 10
-    }}
->
-                <CircularProgress />
-            </Box>
+
+            employee.fullName.toLowerCase().includes(keyword) ||
+
+            employee.employeeCode.toLowerCase().includes(keyword) ||
+
+            employee.email.toLowerCase().includes(keyword) ||
+
+            employee.designation.toLowerCase().includes(keyword)
+
         );
+
+    });
+
+    const handleDelete = async (employee) => {
+
+    const confirmDelete = window.confirm(
+        `Delete ${employee.fullName}?`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+        await deleteEmployee(employee.id);
+
+        alert("Employee Deleted Successfully");
+
+        loadEmployees();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Unable to Delete Employee");
+
     }
 
-    return (
-        <Box>
+};
+
+    if (loading) {
+
+        return (
 
             <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 3
-                }}
+                display="flex"
+                justifyContent="center"
+                mt={10}
             >
-
-                <Typography variant="h4">
-                    Employee Management
-                </Typography>
-
-               <Button
-    variant="contained"
-    onClick={() => setOpen(true)}
->
-    Add Employee
-</Button>
-
+                <CircularProgress />
             </Box>
 
-            <Paper elevation={3}>
+        );
 
-                <Table>
+    }
+    const handleEdit = async (employee) => {
 
-                    <TableHead>
+    try {
 
-                        <TableRow>
+        const data = await getEmployeeById(employee.id);
 
-                            <TableCell>
-                                <b>Code</b>
-                            </TableCell>
+        setSelectedEmployee(data);
 
-                            <TableCell>
-                                <b>Name</b>
-                            </TableCell>
+        setDialogMode("edit");
 
-                            <TableCell>
-                                <b>Email</b>
-                            </TableCell>
+        setOpen(true);
 
-                            <TableCell>
-                                <b>Designation</b>
-                            </TableCell>
+    } catch (error) {
 
-                            <TableCell>
-                                <b>Department</b>
-                            </TableCell>
+        console.error(error);
 
-                            <TableCell>
-                                <b>Status</b>
-                            </TableCell>
+        alert("Unable to load employee details.");
 
-                        </TableRow>
+    }
 
-                    </TableHead>
+};
 
-                    <TableBody>
+    return (
 
-                        {employees.length > 0 ? (
+        <Box>
 
-                            employees.map((employee) => (
+            <Typography
+                variant="h4"
+                mb={3}
+            >
+                Employee Management
+            </Typography>
 
-                                <TableRow key={employee.id}>
+            <EmployeeToolbar
+    search={search}
+    setSearch={setSearch}
+    onAdd={() => {
 
-                                    <TableCell>
-                                        {employee.employeeCode}
-                                    </TableCell>
+        setSelectedEmployee(null);
 
-                                    <TableCell>
-                                        {employee.fullName}
-                                    </TableCell>
+        setDialogMode("add");
 
-                                    <TableCell>
-                                        {employee.email}
-                                    </TableCell>
+        setOpen(true);
 
-                                    <TableCell>
-                                        {employee.designation}
-                                    </TableCell>
+    }}
+/>
 
-                                    <TableCell>
-                                        {employee.departmentName}
-                                    </TableCell>
+           <EmployeeTable
+    employees={filteredEmployees}
+    onEdit={handleEdit}
+    onDelete={handleDelete}
+/>
 
-                                    <TableCell>
-                                        {employee.status}
-                                    </TableCell>
-
-                                </TableRow>
-
-                            ))
-
-                        ) : (
-
-                            <TableRow>
-
-                                <TableCell
-                                    colSpan={6}
-                                    align="center"
-                                >
-
-                                    No Employees Found
-
-                                </TableCell>
-
-                            </TableRow>
-
-                        )}
-
-                    </TableBody>
-
-                </Table>
-
-            </Paper>
             <EmployeeDialog
     open={open}
-    handleClose={() => setOpen(false)}
+    handleClose={() => {
+
+        setOpen(false);
+
+        setSelectedEmployee(null);
+
+    }}
     loadEmployees={loadEmployees}
+    selectedEmployee={selectedEmployee}
+    dialogMode={dialogMode}
 />
+
         </Box>
+
     );
+
 }
 
 export default Employee;

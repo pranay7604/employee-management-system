@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { getAllDepartments } from "../../services/departmentService";
-import { createEmployee } from "../../services/employeeService";
 
 import {
     Dialog,
@@ -16,63 +14,195 @@ import {
     MenuItem
 } from "@mui/material";
 
-function EmployeeDialog({
-    open,
-    handleClose,
-    loadEmployees
-}) {
+import {
+    createEmployee,
+    updateEmployee
+} from "../../services/employeeService";
 
-    const [employee, setEmployee] = useState({
-    employeeCode: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    designation: "",
-    salary: "",
-    departmentId: ""
-});
+import {
+    getAllDepartments
+} from "../../services/departmentService";
+
+import userService from "../../services/userService";
+
+function EmployeeDialog({
+
+    open,
+
+    handleClose,
+
+    loadEmployees,
+
+    selectedEmployee,
+
+    dialogMode
+
+}) {   const initialEmployee = {
+
+        employeeCode: "",
+
+        firstName: "",
+
+        lastName: "",
+
+        email: "",
+
+        phone: "",
+
+        gender: "",
+
+        dateOfBirth: "",
+
+        joiningDate: "",
+
+        designation: "",
+
+        salary: "",
+
+        address: "",
+
+        status: "ACTIVE",
+
+        departmentId: "",
+
+        userId: ""
+
+    };
+
+    const [employee, setEmployee] = useState(initialEmployee);
+useEffect(() => {
+
+    if (selectedEmployee) {
+
+        setEmployee({
+
+            employeeCode: selectedEmployee.employeeCode || "",
+
+            firstName: selectedEmployee.firstName || "",
+
+            lastName: selectedEmployee.lastName || "",
+
+            email: selectedEmployee.email || "",
+
+            phone: selectedEmployee.phone || "",
+
+            gender: selectedEmployee.gender || "",
+
+            dateOfBirth: selectedEmployee.dateOfBirth || "",
+
+            joiningDate: selectedEmployee.joiningDate || "",
+
+            designation: selectedEmployee.designation || "",
+
+            salary: selectedEmployee.salary || "",
+
+            address: selectedEmployee.address || "",
+
+            status: selectedEmployee.status || "ACTIVE",
+
+            departmentId: selectedEmployee.departmentId || "",
+
+            userId: selectedEmployee.userId || ""
+
+        });
+
+    } else {
+
+        setEmployee(initialEmployee);
+
+    }
+
+}, [selectedEmployee]);
 
     const [departments, setDepartments] = useState([]);
 
-    const handleChange = (e) => {
+    const [users, setUsers] = useState([]);    const handleChange = (event) => {
 
         setEmployee({
 
             ...employee,
 
-            [e.target.name]: e.target.value
+            [event.target.name]: event.target.value
 
         });
 
+    };    const loadDepartments = async () => {
+
+        try {
+
+            const data = await getAllDepartments();
+
+            setDepartments(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
     };
 
-    useEffect(() => {
-    loadDepartments();
-}, []);
+    const loadUsers = async () => {
 
-const loadDepartments = async () => {
+        try {
+
+            const data = await userService.getAllUsers();
+
+            const availableUsers = data.filter(
+
+                user =>
+
+                    user.role === "EMPLOYEE"
+
+            );
+
+            setUsers(availableUsers);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+    
+    };
+        useEffect(() => {
+
+        if (open) {
+
+            loadDepartments();
+
+            loadUsers();
+
+        }
+
+    }, [open]);
+        const resetForm = () => {
+
+        setEmployee(initialEmployee);
+
+    };
+        const handleSave = async () => {
 
     try {
 
-        const data = await getAllDepartments();
+        if (dialogMode === "edit") {
 
-        setDepartments(data);
+            await updateEmployee(
+                selectedEmployee.id,
+                employee
+            );
 
-    } catch (error) {
+            alert("Employee Updated Successfully");
 
-        console.error(error);
+        } else {
 
-    }
+            await createEmployee(employee);
 
-};
-const handleSave = async () => {
+            alert("Employee Added Successfully");
 
-    try {
+        }
 
-        await createEmployee(employee);
-
-        alert("Employee Added Successfully");
+        setEmployee(initialEmployee);
 
         handleClose();
 
@@ -82,13 +212,13 @@ const handleSave = async () => {
 
         console.error(error);
 
-        alert("Failed to Add Employee");
+        alert("Operation Failed");
 
     }
 
 };
 
-    return (
+        return (
 
         <Dialog
             open={open}
@@ -99,15 +229,21 @@ const handleSave = async () => {
 
             <DialogTitle>
 
-                Add Employee
+    {dialogMode === "edit"
+        ? "Edit Employee"
+        : "Add Employee"}
 
-            </DialogTitle>
+</DialogTitle>
 
             <DialogContent>
 
-                <Grid container spacing={2} sx={{ mt: 1 }}>
+    <Grid
+        container
+        spacing={2}
+        sx={{ mt: 1 }}
+    >
+                                    <Grid item xs={12} md={6}>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
                         <TextField
                             fullWidth
                             label="Employee Code"
@@ -115,9 +251,11 @@ const handleSave = async () => {
                             value={employee.employeeCode}
                             onChange={handleChange}
                         />
+
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
+
                         <TextField
                             fullWidth
                             label="First Name"
@@ -125,9 +263,11 @@ const handleSave = async () => {
                             value={employee.firstName}
                             onChange={handleChange}
                         />
+
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
+
                         <TextField
                             fullWidth
                             label="Last Name"
@@ -135,9 +275,11 @@ const handleSave = async () => {
                             value={employee.lastName}
                             onChange={handleChange}
                         />
+
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
+
                         <TextField
                             fullWidth
                             label="Email"
@@ -145,9 +287,9 @@ const handleSave = async () => {
                             value={employee.email}
                             onChange={handleChange}
                         />
-                    </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    </Grid>
+                                        <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             label="Phone"
@@ -157,7 +299,49 @@ const handleSave = async () => {
                         />
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
+                            <InputLabel>Gender</InputLabel>
+
+                            <Select
+                                name="gender"
+                                value={employee.gender}
+                                label="Gender"
+                                onChange={handleChange}
+                            >
+                                <MenuItem value="MALE">Male</MenuItem>
+                                <MenuItem value="FEMALE">Female</MenuItem>
+                                <MenuItem value="OTHER">Other</MenuItem>
+                            </Select>
+
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            fullWidth
+                            type="date"
+                            label="Date of Birth"
+                            name="dateOfBirth"
+                            value={employee.dateOfBirth}
+                            onChange={handleChange}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            fullWidth
+                            type="date"
+                            label="Joining Date"
+                            name="joiningDate"
+                            value={employee.joiningDate}
+                            onChange={handleChange}
+                            InputLabelProps={{ shrink: true }}
+                        />
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             label="Designation"
@@ -167,63 +351,136 @@ const handleSave = async () => {
                         />
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
+                            type="number"
                             label="Salary"
                             name="salary"
                             value={employee.salary}
                             onChange={handleChange}
                         />
                     </Grid>
-                    <Grid size={{ xs: 12, md: 6 }}>
+                                        <Grid item xs={12}>
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            label="Address"
+                            name="address"
+                            value={employee.address}
+                            onChange={handleChange}
+                        />
+                    </Grid>
 
-    <FormControl fullWidth>
+                    <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
 
-        <InputLabel>Department</InputLabel>
+                            <InputLabel>
+                                Department
+                            </InputLabel>
 
-        <Select
-            name="departmentId"
-            value={employee.departmentId}
-            label="Department"
-            onChange={handleChange}
-        >
+                            <Select
+                                name="departmentId"
+                                value={employee.departmentId}
+                                label="Department"
+                                onChange={handleChange}
+                            >
 
-            {departments.map((department) => (
+                                {departments.map((department) => (
 
-                <MenuItem
-                    key={department.id}
-                    value={department.id}
-                >
-                    {department.departmentName}
-                </MenuItem>
+                                    <MenuItem
+                                        key={department.id}
+                                        value={department.id}
+                                    >
+                                        {department.departmentName}
+                                    </MenuItem>
 
-            ))}
+                                ))}
 
-        </Select>
+                            </Select>
 
-    </FormControl>
+                        </FormControl>
+                    </Grid>
 
-</Grid>
+                    <Grid item xs={12} md={6}>
+                        <FormControl fullWidth>
 
-                </Grid>
+                            <InputLabel>
+                                User
+                            </InputLabel>
+
+                            <Select
+                                name="userId"
+                                value={employee.userId}
+                                label="User"
+                                onChange={handleChange}
+                            >
+
+                                {users.map((user) => (
+
+                                    <MenuItem
+                                        key={user.id}
+                                        value={user.id}
+                                    >
+                                        {user.fullName}
+                                    </MenuItem>
+
+                                ))}
+
+                            </Select>
+
+                        </FormControl>
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        <FormControl fullWidth>
+
+                            <InputLabel>
+                                Status
+                            </InputLabel>
+
+                            <Select
+                                name="status"
+                                value={employee.status}
+                                label="Status"
+                                onChange={handleChange}
+                            >
+                                <MenuItem value="ACTIVE">
+                                    ACTIVE
+                                </MenuItem>
+
+                                <MenuItem value="INACTIVE">
+                                    INACTIVE
+                                </MenuItem>
+                            </Select>
+
+                        </FormControl>
+                    </Grid>
+                                    </Grid>
 
             </DialogContent>
 
             <DialogActions>
 
                 <Button
-                    onClick={handleClose}
+                    onClick={() => {
+
+                        resetForm();
+
+                        handleClose();
+
+                    }}
                 >
                     Cancel
                 </Button>
 
                 <Button
-    variant="contained"
-    onClick={handleSave}
->
-    Save Employee
-</Button>
+                    variant="contained"
+                    onClick={handleSave}
+                >
+                    Save Employee
+                </Button>
 
             </DialogActions>
 

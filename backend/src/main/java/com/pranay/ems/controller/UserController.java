@@ -25,6 +25,16 @@ public class UserController {
         return ResponseEntity.ok(
                 userService.getAllUsers());
     }
+    
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @GetMapping("/available")
+    public ResponseEntity<List<UserResponse>> getAvailableUsers() {
+
+        return ResponseEntity.ok(
+                userService.getAvailableUsers()
+        );
+
+    }
 
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/{id}")

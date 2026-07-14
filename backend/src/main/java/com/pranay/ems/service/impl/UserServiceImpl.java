@@ -6,6 +6,10 @@ import com.pranay.ems.exception.ResourceNotFoundException;
 import com.pranay.ems.repository.UserRepository;
 import com.pranay.ems.service.UserService;
 import org.springframework.stereotype.Service;
+import com.pranay.ems.entity.Employee;
+import com.pranay.ems.repository.EmployeeRepository;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +18,13 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           EmployeeRepository employeeRepository) {
+
         this.userRepository = userRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -54,7 +62,27 @@ public class UserServiceImpl implements UserService {
 
         userRepository.delete(user);
     }
+    @Override
+    public List<UserResponse> getAvailableUsers() {
 
+        List<User> users = userRepository.findAll();
+
+        Set<Long> assignedUserIds = employeeRepository.findByUserIsNotNull()
+                .stream()
+                .map(employee -> employee.getUser().getId())
+                .collect(Collectors.toSet());
+
+        List<UserResponse> availableUsers = new ArrayList<>();
+
+        for (User user : users) {
+
+            if (!assignedUserIds.contains(user.getId())) {
+                availableUsers.add(mapToResponse(user));
+            }
+        }
+
+        return availableUsers;
+    }
     private UserResponse mapToResponse(User user) {
 
         return UserResponse.builder()

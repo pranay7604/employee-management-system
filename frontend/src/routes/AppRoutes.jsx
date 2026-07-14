@@ -24,20 +24,11 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         >
-         <Route
-    path="/dashboard"
-    element={<Dashboard />}
-/>
+          <Route path="/dashboard" element={<Dashboard />} />
 
-<Route
-    path="/users"
-    element={<User />}
-/>
+          <Route path="/users" element={<User />} />
 
-<Route
-    path="/employees"
-    element={<Employee />}
-/>
+          <Route path="/employees" element={<Employee />} />
         </Route>
       </Routes>
     </BrowserRouter>

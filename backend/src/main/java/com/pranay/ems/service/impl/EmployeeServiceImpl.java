@@ -235,17 +235,52 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeResponse response = new EmployeeResponse();
 
         response.setId(employee.getId());
+
         response.setEmployeeCode(employee.getEmployeeCode());
-        response.setFullName(employee.getFirstName() + " " + employee.getLastName());
+
+        response.setFirstName(employee.getFirstName());
+
+        response.setLastName(employee.getLastName());
+
+        response.setFullName(
+                employee.getFirstName() + " " + employee.getLastName()
+        );
+
         response.setEmail(employee.getEmail());
+
+        response.setPhone(employee.getPhone());
+
+        response.setGender(employee.getGender());
+
+        response.setDateOfBirth(employee.getDateOfBirth());
+
+        response.setJoiningDate(employee.getJoiningDate());
+
         response.setDesignation(employee.getDesignation());
+
+        response.setSalary(employee.getSalary());
+
+        response.setAddress(employee.getAddress());
+
         response.setStatus(employee.getStatus());
 
         if (employee.getDepartment() != null) {
+
+            response.setDepartmentId(employee.getDepartment().getId());
+
             response.setDepartmentName(
-                    employee.getDepartment().getDepartmentName());
+                    employee.getDepartment().getDepartmentName()
+            );
+
+        }
+
+        if (employee.getUser() != null) {
+
+            response.setUserId(employee.getUser().getId());
+
         }
 
         return response;
+
     }
 }

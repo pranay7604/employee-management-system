@@ -22,8 +22,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             String lastName,
             String employeeCode,
             String email
+
     );
     List<Employee> findByStatus(EmployeeStatus status);
     List<Employee> findByDesignationContainingIgnoreCase(String designation);
+    List<Employee> findByUserIsNotNull();
     long countByStatus(EmployeeStatus status);
 }
