@@ -1,138 +1,178 @@
 import { useEffect, useState } from "react";
-import { getDashboard } from "../../services/dashboardService";
 
 import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Box
+    Grid,
+    Typography,
+    Box,
+    CircularProgress
 } from "@mui/material";
+
+import PeopleIcon from "@mui/icons-material/People";
+import BusinessIcon from "@mui/icons-material/Business";
+import PersonIcon from "@mui/icons-material/Person";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import EmployeeChart from "../../components/dashboard/EmployeeChart";
+import AttendanceChart from "../../components/dashboard/AttendanceChart";
+
+import Paper from "@mui/material/Paper";
+
+import StatsCard from "../../components/dashboard/StatsCard";
+
+import { getDashboard } from "../../services/dashboardService";
 
 function Dashboard() {
 
-  const [dashboard, setDashboard] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [dashboard, setDashboard] = useState(null);
 
-  useEffect(() => {
+    const [loading, setLoading] = useState(true);
 
-    loadDashboard();
+    useEffect(() => {
 
-  }, []);
+        loadDashboard();
 
-  const loadDashboard = async () => {
+    }, []);
 
-    try {
+    const loadDashboard = async () => {
 
-      const data = await getDashboard();
+        try {
 
-      setDashboard(data);
+            const data = await getDashboard();
 
-    } catch (error) {
+            setDashboard(data);
 
-      console.error(error);
+        } catch (error) {
 
-    } finally {
+            console.error(error);
 
-      setLoading(false);
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    if (loading) {
+
+        return (
+
+            <Box
+                display="flex"
+                justifyContent="center"
+                mt={10}
+            >
+                <CircularProgress />
+            </Box>
+
+        );
 
     }
 
-  };
-
-  if (loading) {
-
     return (
 
-      <Box
-        display="flex"
-        justifyContent="center"
-        mt={10}
-      >
+        <Box>
 
-        <CircularProgress />
+            <Typography
+                variant="h4"
+                fontWeight="bold"
+                mb={4}
+            >
+                Dashboard
+            </Typography>
 
-      </Box>
+            <Grid container spacing={3}>
+
+                <Grid item xs={12} sm={6} md={3}>
+
+                    <StatsCard
+                        title="Employees"
+                        value={dashboard.totalEmployees}
+                        icon={<PeopleIcon />}
+                        color="#1976d2"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+
+                    <StatsCard
+                        title="Departments"
+                        value={dashboard.totalDepartments}
+                        icon={<BusinessIcon />}
+                        color="#2e7d32"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+
+                    <StatsCard
+                        title="Present Today"
+                        value={dashboard.presentEmployees}
+                        icon={<PersonIcon />}
+                        color="#ed6c02"
+                    />
+
+                </Grid>
+
+                <Grid item xs={12} sm={6} md={3}>
+
+                    <StatsCard
+                        title="Attendance Today"
+                        value={dashboard.todayAttendance}
+                        icon={<AccessTimeIcon />}
+                        color="#9c27b0"
+                    />
+
+                </Grid>
+                
+            </Grid>
+<Grid item xs={12} md={6}>
+
+    <Paper
+        elevation={3}
+        sx={{ p: 3, borderRadius: 3 }}
+    >
+
+        <Typography
+            variant="h6"
+            mb={2}
+        >
+            Employee Statistics
+        </Typography>
+
+        <EmployeeChart
+            dashboard={dashboard}
+        />
+
+    </Paper>
+
+</Grid>
+
+<Grid item xs={12} md={6}>
+
+    <Paper
+        elevation={3}
+        sx={{ p: 3, borderRadius: 3 }}
+    >
+
+        <Typography
+            variant="h6"
+            mb={2}
+        >
+            Attendance Statistics
+        </Typography>
+
+        <AttendanceChart
+            dashboard={dashboard}
+        />
+
+    </Paper>
+
+</Grid>
+        </Box>
 
     );
-
-  }
-
-  return (
-
-    <Box>
-
-      <Typography
-        variant="h4"
-        mb={3}
-      >
-        Dashboard
-      </Typography>
-
-      <Grid container spacing={3}>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">
-                Employees
-              </Typography>
-
-              <Typography variant="h4">
-                {dashboard.totalEmployees}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">
-                Departments
-              </Typography>
-
-              <Typography variant="h4">
-                {dashboard.totalDepartments}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">
-                Pending Leaves
-              </Typography>
-
-              <Typography variant="h4">
-                {dashboard.pendingLeaves}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">
-                Payroll
-              </Typography>
-
-              <Typography variant="h4">
-                ₹{dashboard.monthlySalaryExpense}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-      </Grid>
-
-    </Box>
-
-  );
 
 }
 

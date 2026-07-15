@@ -15,6 +15,7 @@ import {
 import EmployeeTable from "../../components/employee/EmployeeTable";
 import EmployeeToolbar from "../../components/employee/EmployeeToolbar";
 import EmployeeDialog from "../../components/employee/EmployeeDialog";
+import DeleteConfirmDialog from "../../components/common/DeleteConfirmDialog";
 
 function Employee() {
 
@@ -27,8 +28,11 @@ function Employee() {
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
          const [dialogMode, setDialogMode] = useState("add");
+const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-    const loadEmployees = async () => {
+const [employeeToDelete, setEmployeeToDelete] = useState(null);
+    
+const loadEmployees = async () => {
 
         try {
 
@@ -72,19 +76,23 @@ function Employee() {
 
     });
 
-    const handleDelete = async (employee) => {
+    const handleDelete = (employee) => {
 
-    const confirmDelete = window.confirm(
-        `Delete ${employee.fullName}?`
-    );
+    setEmployeeToDelete(employee);
 
-    if (!confirmDelete) return;
+    setDeleteDialogOpen(true);
+
+};
+
+const confirmDelete = async () => {
 
     try {
 
-        await deleteEmployee(employee.id);
+        await deleteEmployee(employeeToDelete.id);
 
-        alert("Employee Deleted Successfully");
+        setDeleteDialogOpen(false);
+
+        setEmployeeToDelete(null);
 
         loadEmployees();
 
@@ -178,6 +186,19 @@ function Employee() {
     loadEmployees={loadEmployees}
     selectedEmployee={selectedEmployee}
     dialogMode={dialogMode}
+/>
+<DeleteConfirmDialog
+    open={deleteDialogOpen}
+    title="Delete Employee"
+    message={`Are you sure you want to delete ${employeeToDelete?.fullName}?`}
+    onCancel={() => {
+
+        setDeleteDialogOpen(false);
+
+        setEmployeeToDelete(null);
+
+    }}
+    onConfirm={confirmDelete}
 />
 
         </Box>
