@@ -10,18 +10,28 @@ import User from "../pages/User/User";
 import Employee from "../pages/Employee/Employee";
 import Department from "../pages/Department/Department";
 import Attendance from "../pages/Attendance/Attendance";
+import Leave from "../pages/Leave/Leave";
+import Payroll from "../pages/Payroll/Payroll";
 
 function AppRoutes() {
+
     return (
+
         <BrowserRouter>
 
             <Routes>
 
                 {/* Public Routes */}
 
-                <Route path="/" element={<Login />} />
+                <Route
+                    path="/"
+                    element={<Login />}
+                />
 
-                <Route path="/login" element={<Login />} />
+                <Route
+                    path="/login"
+                    element={<Login />}
+                />
 
                 {/* Protected Routes */}
 
@@ -58,12 +68,22 @@ function AppRoutes() {
                         element={<Attendance />}
                     />
 
+                    <Route
+                        path="/leave"
+                        element={<Leave />}
+                    />
+                    <Route path="/payroll" 
+                    element={<Payroll />} 
+                    />
+
                 </Route>
 
             </Routes>
 
         </BrowserRouter>
+
     );
+
 }
 
 export default AppRoutes;

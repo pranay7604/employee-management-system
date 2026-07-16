@@ -58,11 +58,6 @@ const menuItems = [
         text: "Payroll",
         icon: <Payments />,
         path: "/payroll"
-    },
-    {
-        text: "Reports",
-        icon: <Assessment />,
-        path: "/reports"
     }
 ];
 
