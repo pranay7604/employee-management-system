@@ -14,76 +14,40 @@ import Leave from "../pages/Leave/Leave";
 import Payroll from "../pages/Payroll/Payroll";
 
 function AppRoutes() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
 
-    return (
+        <Route path="/" element={<Login />} />
 
-        <BrowserRouter>
+        <Route path="/login" element={<Login />} />
 
-            <Routes>
+        {/* Protected Routes */}
 
-                {/* Public Routes */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
 
-                <Route
-                    path="/"
-                    element={<Login />}
-                />
+          <Route path="/users" element={<User />} />
 
-                <Route
-                    path="/login"
-                    element={<Login />}
-                />
+          <Route path="/employees" element={<Employee />} />
 
-                {/* Protected Routes */}
+          <Route path="/departments" element={<Department />} />
 
-                <Route
-                    element={
-                        <ProtectedRoute>
-                            <DashboardLayout />
-                        </ProtectedRoute>
-                    }
-                >
+          <Route path="/attendance" element={<Attendance />} />
 
-                    <Route
-                        path="/dashboard"
-                        element={<Dashboard />}
-                    />
-
-                    <Route
-                        path="/users"
-                        element={<User />}
-                    />
-
-                    <Route
-                        path="/employees"
-                        element={<Employee />}
-                    />
-
-                    <Route
-                        path="/departments"
-                        element={<Department />}
-                    />
-
-                    <Route
-                        path="/attendance"
-                        element={<Attendance />}
-                    />
-
-                    <Route
-                        path="/leave"
-                        element={<Leave />}
-                    />
-                    <Route path="/payroll" 
-                    element={<Payroll />} 
-                    />
-
-                </Route>
-
-            </Routes>
-
-        </BrowserRouter>
-
-    );
-
+          <Route path="/leave" element={<Leave />} />
+          <Route path="/payroll" element={<Payroll />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default AppRoutes;

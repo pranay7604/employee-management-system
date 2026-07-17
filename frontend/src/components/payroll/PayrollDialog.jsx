@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Grid
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
 } from "@mui/material";
 
 import { getAllEmployees } from "../../services/employeeService";
@@ -19,394 +19,299 @@ import { generatePayroll } from "../../services/payrollService";
 import CustomSnackbar from "../common/CustomSnackbar";
 
 const initialPayroll = {
+  employeeId: "",
 
-    employeeId: "",
+  month: "",
 
-    month: "",
+  year: new Date().getFullYear(),
 
-    year: new Date().getFullYear(),
+  basicSalary: "",
 
-    basicSalary: "",
+  hra: "",
 
-    hra: "",
+  da: "",
 
-    da: "",
+  medicalAllowance: "",
 
-    medicalAllowance: "",
+  bonus: "",
 
-    bonus: "",
+  pf: "",
 
-    pf: "",
+  tax: "",
 
-    tax: "",
-
-    otherDeductions: ""
-
+  otherDeductions: "",
 };
 
 function PayrollDialog({
+  open,
 
-    open,
+  handleClose,
 
-    handleClose,
-
-    loadPayrolls
-
+  loadPayrolls,
 }) {
+  const [payroll, setPayroll] = useState(initialPayroll);
 
-    const [payroll, setPayroll] = useState(initialPayroll);
+  const [employees, setEmployees] = useState([]);
 
-    const [employees, setEmployees] = useState([]);
+  const [errors, setErrors] = useState({});
 
-    const [errors, setErrors] = useState({});
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
-    const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  useEffect(() => {
+    if (open) {
+      loadEmployees();
+    }
+  }, [open]);
 
-    useEffect(() => {
+  const loadEmployees = async () => {
+    try {
+      const data = await getAllEmployees();
 
-        if (open) {
+      setEmployees(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-            loadEmployees();
+  const handleChange = (e) => {
+    setPayroll({
+      ...payroll,
 
-        }
+      [e.target.name]: e.target.value,
+    });
+  };
 
-    }, [open]);
+  const validateForm = () => {
+    const newErrors = {};
 
-    const loadEmployees = async () => {
+    if (!payroll.employeeId) newErrors.employeeId = "Employee is required";
 
-        try {
+    if (!payroll.month) newErrors.month = "Month is required";
 
-            const data = await getAllEmployees();
+    if (!payroll.year) newErrors.year = "Year is required";
 
-            setEmployees(data);
+    if (!payroll.basicSalary)
+      newErrors.basicSalary = "Basic Salary is required";
 
-        } catch (error) {
+    if (!payroll.hra) newErrors.hra = "HRA is required";
 
-            console.error(error);
+    if (!payroll.da) newErrors.da = "DA is required";
 
-        }
+    if (!payroll.medicalAllowance)
+      newErrors.medicalAllowance = "Medical Allowance is required";
 
-    };
+    if (!payroll.bonus) newErrors.bonus = "Bonus is required";
 
-    const handleChange = (e) => {
+    if (!payroll.pf) newErrors.pf = "PF is required";
 
-        setPayroll({
+    if (!payroll.tax) newErrors.tax = "Tax is required";
 
-            ...payroll,
+    if (!payroll.otherDeductions)
+      newErrors.otherDeductions = "Other Deductions are required";
 
-            [e.target.name]: e.target.value
+    setErrors(newErrors);
 
-        });
+    return Object.keys(newErrors).length === 0;
+  };
 
-    };
-
-    const validateForm = () => {
-
-        const newErrors = {};
-
-        if (!payroll.employeeId)
-            newErrors.employeeId = "Employee is required";
-
-        if (!payroll.month)
-            newErrors.month = "Month is required";
-
-        if (!payroll.year)
-            newErrors.year = "Year is required";
-
-        if (!payroll.basicSalary)
-            newErrors.basicSalary = "Basic Salary is required";
-
-        if (!payroll.hra)
-            newErrors.hra = "HRA is required";
-
-        if (!payroll.da)
-            newErrors.da = "DA is required";
-
-        if (!payroll.medicalAllowance)
-            newErrors.medicalAllowance = "Medical Allowance is required";
-
-        if (!payroll.bonus)
-            newErrors.bonus = "Bonus is required";
-
-        if (!payroll.pf)
-            newErrors.pf = "PF is required";
-
-        if (!payroll.tax)
-            newErrors.tax = "Tax is required";
-
-        if (!payroll.otherDeductions)
-            newErrors.otherDeductions = "Other Deductions are required";
-
-        setErrors(newErrors);
-
-        return Object.keys(newErrors).length === 0;
-
-    };
-
-    const handleSnackbarClose = () => {
-
-        setSnackbarOpen(false);
-
-    };
-    const handleSave = async () => {
-
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+  const handleSave = async () => {
     if (!validateForm()) return;
 
     try {
+      await generatePayroll(payroll);
 
-        await generatePayroll(payroll);
+      setSnackbarMessage("Payroll Generated Successfully");
 
-        setSnackbarMessage("Payroll Generated Successfully");
+      setSnackbarSeverity("success");
 
-        setSnackbarSeverity("success");
+      setSnackbarOpen(true);
 
-        setSnackbarOpen(true);
+      setPayroll(initialPayroll);
 
-        setPayroll(initialPayroll);
+      loadPayrolls();
 
-        loadPayrolls();
-
-        handleClose();
-
+      handleClose();
     } catch (error) {
+      console.error(error);
 
-        console.error(error);
+      setSnackbarMessage(
+        error.response?.data?.message || "Failed to Generate Payroll",
+      );
 
-        setSnackbarMessage(
-            error.response?.data?.message || "Failed to Generate Payroll"
-        );
+      setSnackbarSeverity("error");
 
-        setSnackbarSeverity("error");
-
-        setSnackbarOpen(true);
-
+      setSnackbarOpen(true);
     }
+  };
 
-};
+  return (
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+      <DialogTitle>Generate Payroll</DialogTitle>
 
-return (
+      <DialogContent>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>Employee</InputLabel>
 
-    <Dialog
-        open={open}
-        onClose={handleClose}
-        fullWidth
-        maxWidth="md"
-    >
+              <Select
+                label="Employee"
+                name="employeeId"
+                value={payroll.employeeId}
+                onChange={handleChange}
+              >
+                {employees.map((employee) => (
+                  <MenuItem key={employee.id} value={employee.id}>
+                    {employee.employeeCode} - {employee.fullName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
 
-        <DialogTitle>
+          <Grid item xs={6} md={3}>
+            <TextField
+              fullWidth
+              label="Month"
+              name="month"
+              type="number"
+              value={payroll.month}
+              onChange={handleChange}
+            />
+          </Grid>
 
-            Generate Payroll
+          <Grid item xs={6} md={3}>
+            <TextField
+              fullWidth
+              label="Year"
+              name="year"
+              type="number"
+              value={payroll.year}
+              onChange={handleChange}
+            />
+          </Grid>
 
-        </DialogTitle>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Basic Salary"
+              name="basicSalary"
+              type="number"
+              value={payroll.basicSalary}
+              onChange={handleChange}
+            />
+          </Grid>
 
-        <DialogContent>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="HRA"
+              name="hra"
+              type="number"
+              value={payroll.hra}
+              onChange={handleChange}
+            />
+          </Grid>
 
-            <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="DA"
+              name="da"
+              type="number"
+              value={payroll.da}
+              onChange={handleChange}
+            />
+          </Grid>
 
-                <Grid item xs={12} md={6}>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Medical Allowance"
+              name="medicalAllowance"
+              type="number"
+              value={payroll.medicalAllowance}
+              onChange={handleChange}
+            />
+          </Grid>
 
-                    <FormControl fullWidth>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Bonus"
+              name="bonus"
+              type="number"
+              value={payroll.bonus}
+              onChange={handleChange}
+            />
+          </Grid>
 
-                        <InputLabel>Employee</InputLabel>
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="PF"
+              name="pf"
+              type="number"
+              value={payroll.pf}
+              onChange={handleChange}
+            />
+          </Grid>
 
-                        <Select
-                            label="Employee"
-                            name="employeeId"
-                            value={payroll.employeeId}
-                            onChange={handleChange}
-                        >
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Tax"
+              name="tax"
+              type="number"
+              value={payroll.tax}
+              onChange={handleChange}
+            />
+          </Grid>
 
-                            {employees.map((employee) => (
+          <Grid item xs={6}>
+            <TextField
+              fullWidth
+              label="Other Deductions"
+              name="otherDeductions"
+              type="number"
+              value={payroll.otherDeductions}
+              onChange={handleChange}
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
 
-                                <MenuItem
-                                    key={employee.id}
-                                    value={employee.id}
-                                >
+      <DialogActions>
+        <Button
+          onClick={() => {
+            setPayroll(initialPayroll);
 
-                                    {employee.employeeCode} - {employee.fullName}
+            handleClose();
+          }}
+        >
+          Cancel
+        </Button>
 
-                                </MenuItem>
+        <Button variant="contained" onClick={handleSave}>
+          Generate Payroll
+        </Button>
+      </DialogActions>
 
-                            ))}
-
-                        </Select>
-
-                    </FormControl>
-
-                </Grid>
-
-                <Grid item xs={6} md={3}>
-
-                    <TextField
-                        fullWidth
-                        label="Month"
-                        name="month"
-                        type="number"
-                        value={payroll.month}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6} md={3}>
-
-                    <TextField
-                        fullWidth
-                        label="Year"
-                        name="year"
-                        type="number"
-                        value={payroll.year}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="Basic Salary"
-                        name="basicSalary"
-                        type="number"
-                        value={payroll.basicSalary}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="HRA"
-                        name="hra"
-                        type="number"
-                        value={payroll.hra}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="DA"
-                        name="da"
-                        type="number"
-                        value={payroll.da}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="Medical Allowance"
-                        name="medicalAllowance"
-                        type="number"
-                        value={payroll.medicalAllowance}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="Bonus"
-                        name="bonus"
-                        type="number"
-                        value={payroll.bonus}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="PF"
-                        name="pf"
-                        type="number"
-                        value={payroll.pf}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="Tax"
-                        name="tax"
-                        type="number"
-                        value={payroll.tax}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-                <Grid item xs={6}>
-
-                    <TextField
-                        fullWidth
-                        label="Other Deductions"
-                        name="otherDeductions"
-                        type="number"
-                        value={payroll.otherDeductions}
-                        onChange={handleChange}
-                    />
-
-                </Grid>
-
-            </Grid>
-
-        </DialogContent>
-
-        <DialogActions>
-
-            <Button
-                onClick={() => {
-
-                    setPayroll(initialPayroll);
-
-                    handleClose();
-
-                }}
-            >
-                Cancel
-            </Button>
-
-            <Button
-                variant="contained"
-                onClick={handleSave}
-            >
-                Generate Payroll
-            </Button>
-
-        </DialogActions>
-
-        <CustomSnackbar
-            open={snackbarOpen}
-            handleClose={handleSnackbarClose}
-            message={snackbarMessage}
-            severity={snackbarSeverity}
-        />
-
+      <CustomSnackbar
+        open={snackbarOpen}
+        handleClose={handleSnackbarClose}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+      />
     </Dialog>
-
-);
-
+  );
 }
 
 export default PayrollDialog;

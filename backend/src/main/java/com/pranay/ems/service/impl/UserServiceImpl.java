@@ -6,7 +6,6 @@ import com.pranay.ems.exception.ResourceNotFoundException;
 import com.pranay.ems.repository.UserRepository;
 import com.pranay.ems.service.UserService;
 import org.springframework.stereotype.Service;
-import com.pranay.ems.entity.Employee;
 import com.pranay.ems.repository.EmployeeRepository;
 import java.util.Set;
 import java.util.stream.Collectors;

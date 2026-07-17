@@ -1,78 +1,48 @@
-import {
-    Card,
-    CardContent,
-    Typography,
-    Box
-} from "@mui/material";
+import { Card, CardContent, Typography, Box } from "@mui/material";
 
 function StatsCard({
+  title,
 
-    title,
+  value,
 
-    value,
+  icon,
 
-    icon,
-
-    color
-
+  color,
 }) {
+  return (
+    <Card
+      elevation={3}
+      sx={{
+        borderRadius: 3,
+        height: "100%",
+      }}
+    >
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box>
+            <Typography color="text.secondary" variant="subtitle2">
+              {title}
+            </Typography>
 
-    return (
+            <Typography variant="h4" fontWeight="bold" mt={1}>
+              {value}
+            </Typography>
+          </Box>
 
-        <Card
-            elevation={3}
+          <Box
             sx={{
-                borderRadius: 3,
-                height: "100%"
+              bgcolor: color,
+              color: "#fff",
+              p: 2,
+              borderRadius: 2,
             }}
-        >
-
-            <CardContent>
-
-                <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                >
-
-                    <Box>
-
-                        <Typography
-                            color="text.secondary"
-                            variant="subtitle2"
-                        >
-                            {title}
-                        </Typography>
-
-                        <Typography
-                            variant="h4"
-                            fontWeight="bold"
-                            mt={1}
-                        >
-                            {value}
-                        </Typography>
-
-                    </Box>
-
-                    <Box
-                        sx={{
-                            bgcolor: color,
-                            color: "#fff",
-                            p: 2,
-                            borderRadius: 2
-                        }}
-                    >
-                        {icon}
-                    </Box>
-
-                </Box>
-
-            </CardContent>
-
-        </Card>
-
-    );
-
+          >
+            {icon}
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
+  );
 }
 
 export default StatsCard;

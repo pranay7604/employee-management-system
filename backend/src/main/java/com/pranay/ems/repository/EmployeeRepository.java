@@ -3,7 +3,6 @@ package com.pranay.ems.repository;
 import com.pranay.ems.entity.Employee;
 import com.pranay.ems.enums.EmployeeStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
